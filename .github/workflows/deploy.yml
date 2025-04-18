@@ -1,0 +1,36 @@
+name: 🚀 Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 📁 Create deployment ZIP
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: 🚀 Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: github-action-pratice
+          environment_name: github-action-pratice-env
+          region: ap-southeast-2
+          version_label: v-${{ github.run_number }}
+          deployment_package: deploy.zip
